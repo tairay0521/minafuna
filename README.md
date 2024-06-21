@@ -1,1 +1,2 @@
-# minafuna
+# Minafuna Amusement Hotel
+## Researvation system
