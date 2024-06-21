@@ -1,2 +1,2 @@
 # Minafuna Amusement Hotel
-## Researvation system
+## Reservation system
