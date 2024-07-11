@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class RoomException extends Exception {
 
-	private List detailMessages = new ArrayList();
+	private List<String> detailMessages = new ArrayList<>();
 
 	public static final int CODE_AVAILABLE_QTY_OUT_OF_BOUNDS = 1;
 
@@ -91,7 +91,7 @@ public class RoomException extends Exception {
 
 	}
 
-	public List getDetailMessages() {
+	public List<String> getDetailMessages() {
 		return detailMessages;
 	}
 }
