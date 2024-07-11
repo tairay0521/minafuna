@@ -13,6 +13,7 @@ import app.AppException;
 import app.checkin.CheckInRoomForm;
 import app.checkout.CheckOutRoomForm;
 import app.reservation.ReserveRoomForm;
+import domain.DaoFactory;
 
 /**
  * CUI class for Hotel Reservation Systems
@@ -21,7 +22,7 @@ import app.reservation.ReserveRoomForm;
 public class CUI {
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-
+	private static final int ADMINISTRATOR_PASSWORD = "YAMAZAKI_TAIRON".hashCode();
 	private BufferedReader reader;
 
 	CUI() {
@@ -29,22 +30,58 @@ public class CUI {
 	}
 
 	private void execute() throws IOException {
+		System.out.println("Hotel Reservation System ~~Synod-Minafuna Bay Hotel~~");
+
+		System.out.println("1. Client");
+		System.out.println("2. Administrator");
+
+		System.out.print("> ");
+
+		try {
+			String input = reader.readLine();
+			int select = Integer.parseInt(input);
+
+			switch (select) {
+				case 1:
+					executeClient();
+					break;
+				case 2:
+					System.out.println("Input password");
+					System.out.print("> ");
+					String password = reader.readLine();
+					if (password.hashCode() != ADMINISTRATOR_PASSWORD) {
+						System.out.println("Invalid password");
+						break;
+					}
+					executeAdmin();
+					break;
+				default:
+					System.out.println("Invalid input");
+					break;
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("Invalid input");
+		} finally {
+			reader.close();
+		}
+		System.out.println("Terminated the system.");
+	}
+
+	private void executeClient() throws IOException {
 		try {
 			while (true) {
 				int selectMenu;
 				System.out.println("");
 				System.out.println("Menu");
-				System.out.println("1: Reservation");
-				System.out.println("2: Check-in");
-				System.out.println("3: Check-out");
+				System.out.println("1. Check empty rooms");
+				System.out.println("2: Reservation");
 				System.out.println("9: End");
 				System.out.print("> ");
 
 				try {
 					String menu = reader.readLine();
 					selectMenu = Integer.parseInt(menu);
-				}
-				catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					selectMenu = 4;
 				}
 
@@ -54,24 +91,64 @@ public class CUI {
 
 				switch (selectMenu) {
 					case 1:
-						reserveRoom();
+						checkEmptyRooms();
 						break;
 					case 2:
-						checkInRoom();
-						break;
-					case 3:
-						checkOutRoom();
+						reserveRoom();
 						break;
 				}
 			}
 			System.out.println("Ended");
-		}
-		catch (AppException e) {
+		} catch (AppException e) {
 			System.err.println("Error");
 			System.err.println(e.getFormattedDetailMessages(LINE_SEPARATOR));
 		}
-		finally {
-			reader.close();
+	}
+
+	private void executeAdmin() throws IOException {
+		System.out.println("Administrator mode");
+		System.out.println("1. Check-in");
+		System.out.println("2. Check-out");
+		System.out.println("9. End");
+
+		System.out.print("> ");
+
+		try {
+			while (true) {
+				String input = reader.readLine();
+				int select = Integer.parseInt(input);
+
+				switch (select) {
+					case 1:
+						checkInRoom();
+						break;
+					case 2:
+						checkOutRoom();
+						break;
+					case 9:
+						return;
+					default:
+						System.out.println("Invalid input");
+						break;
+				}
+			}
+		} catch (AppException e) {
+			System.err.println("Error");
+			System.err.println(e.getFormattedDetailMessages(LINE_SEPARATOR));
+		}
+	}
+
+	private void checkEmptyRooms() throws AppException {
+		var roomsDAO = DaoFactory.getInstance().getRoomDao();
+		try {
+			var emptyList = roomsDAO.getEmptyRooms();
+			emptyList.sort((a, b) -> a.getRoomNumber().compareTo(b.getRoomNumber()));
+			System.out.println("Empty rooms");
+			for (var room : emptyList) {
+				System.out.println("Room Number: " + room.getRoomNumber());
+			}
+		} catch (Exception e) {
+			throw new AppException("Failed to check empty rooms", e);
 		}
 	}
 
