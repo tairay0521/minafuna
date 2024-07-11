@@ -107,14 +107,14 @@ public class CUI {
 
 	private void executeAdmin() throws IOException {
 		System.out.println("Administrator mode");
-		System.out.println("1. Check-in");
-		System.out.println("2. Check-out");
-		System.out.println("9. End");
-
-		System.out.print("> ");
 
 		try {
 			while (true) {
+				System.out.println("1. Check-in");
+				System.out.println("2. Check-out");
+				System.out.println("9. End");
+
+				System.out.print("> ");
 				String input = reader.readLine();
 				int select = Integer.parseInt(input);
 

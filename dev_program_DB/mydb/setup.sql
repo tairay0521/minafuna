@@ -1,5 +1,4 @@
 /* Copyright(C) 2007 National Institute of Informatics, All rights reserved.*/
-CREATE USER SA PASSWORD "" ADMIN
 
 DROP TABLE PAYMENT IF EXISTS;
 DROP TABLE AVAILABLEQTY IF EXISTS;
