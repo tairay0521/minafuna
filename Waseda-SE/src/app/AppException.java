@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class AppException extends Exception {
 
-	private List detailMessages = new ArrayList();
+	private List<String> detailMessages = new ArrayList<>();
 
 	public AppException(String message, Throwable cause) {
 		super(message, cause);
@@ -26,7 +26,7 @@ public class AppException extends Exception {
 		super(cause);
 	}
 
-	public List getDetailMessages() {
+	public List<String> getDetailMessages() {
 		return detailMessages;
 	}
 
@@ -38,7 +38,7 @@ public class AppException extends Exception {
 			buffer.append(separator);
 		}
 
-		List detailMessages = getDetailMessages();
+		var detailMessages = getDetailMessages();
 		int len = detailMessages.size();
 		if (len > 0) {
 			buffer.append("Detail:");

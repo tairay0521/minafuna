@@ -51,17 +51,14 @@ public class AvailableQtySqlDao implements AvailableQtyDao {
 				availableQty = new AvailableQty();
 				availableQty.setDate(date);
 				availableQty.setQty(Integer.parseInt(resultSet.getString("qty")));
-			}
-			else {
+			} else {
 				return null;
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("getAvailableQty()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 		return availableQty;
@@ -87,13 +84,11 @@ public class AvailableQtySqlDao implements AvailableQtyDao {
 			sql.append("';");
 
 			resultSet = statement.executeQuery(sql.toString());
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("updateAvailableQty()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 	}
@@ -119,13 +114,11 @@ public class AvailableQtySqlDao implements AvailableQtyDao {
 			sql.append("');");
 
 			resultSet = statement.executeQuery(sql.toString());
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("createAbailableQty()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 	}
@@ -135,8 +128,7 @@ public class AvailableQtySqlDao implements AvailableQtyDao {
 		try {
 			Class.forName(DRIVER_NAME);
 			connection = DriverManager.getConnection(URL, ID, PASSWORD);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new RoomException(RoomException.CODE_DB_CONNECT_ERROR, e);
 		}
 		return connection;
@@ -154,8 +146,7 @@ public class AvailableQtySqlDao implements AvailableQtyDao {
 			if (connection != null) {
 				connection.close();
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new RoomException(RoomException.CODE_DB_CLOSE_ERROR, e);
 		}
 	}

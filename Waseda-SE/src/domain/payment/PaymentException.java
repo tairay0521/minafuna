@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class PaymentException extends Exception {
 
-	private List detailMessages = new ArrayList();
+	private List<String> detailMessages = new ArrayList<>();
 
 	public static final int CODE_PAYMENT_NOT_FOUND = 1;
 
@@ -75,7 +75,7 @@ public class PaymentException extends Exception {
 		return result;
 	}
 
-	public List getDetailMessages() {
+	public List<String> getDetailMessages() {
 		return detailMessages;
 	}
 }
