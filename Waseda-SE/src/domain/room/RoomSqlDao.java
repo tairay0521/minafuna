@@ -32,12 +32,12 @@ public class RoomSqlDao implements RoomDao {
 	/**
 	 * @see domain.room.RoomDao#getRooms()
 	 */
-	public List getRooms() throws RoomException {
+	public List<String> getRooms() throws RoomException {
 		StringBuffer sql = new StringBuffer();
 		Statement statement = null;
 		ResultSet resultSet = null;
 		Connection connection = null;
-		List roomList = new ArrayList();
+		List<String> roomList = new ArrayList<>();
 		try {
 			connection = getConnection();
 			statement = connection.createStatement();
@@ -48,13 +48,11 @@ public class RoomSqlDao implements RoomDao {
 			while (resultSet.next()) {
 				roomList.add(resultSet.getString("roomnumber"));
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("getRooms()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 		return roomList;
@@ -84,13 +82,11 @@ public class RoomSqlDao implements RoomDao {
 				room.setRoomNumber(roomNumber);
 				room.setStayingDate(DateUtil.convertToDate(resultSet.getString("stayingDate")));
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("getRoom()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 		return room;
@@ -99,12 +95,12 @@ public class RoomSqlDao implements RoomDao {
 	/**
 	 * @see domain.room.RoomDao#getEmptyRooms()
 	 */
-	public List getEmptyRooms() throws RoomException {
+	public List<Room> getEmptyRooms() throws RoomException {
 		StringBuffer sql = new StringBuffer();
 		Statement statement = null;
 		ResultSet resultSet = null;
 		Connection connection = null;
-		List emptyRoomList = new ArrayList();
+		List<Room> emptyRoomList = new ArrayList<>();
 		try {
 			connection = getConnection();
 			statement = connection.createStatement();
@@ -117,13 +113,11 @@ public class RoomSqlDao implements RoomDao {
 				room.setRoomNumber(resultSet.getString("roomnumber"));
 				emptyRoomList.add(room);
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("getEmptyRooms()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 		return emptyRoomList;
@@ -143,11 +137,10 @@ public class RoomSqlDao implements RoomDao {
 			sql.append("UPDATE ");
 			sql.append(TABLE_NAME);
 			sql.append(" SET stayingdate =");
-			//Room status and staying date share the same portion on DB table
+			// Room status and staying date share the same portion on DB table
 			if (room.getStayingDate() == null) {
 				sql.append("''");
-			}
-			else {
+			} else {
 				sql.append("'");
 				sql.append(DateUtil.convertToString(room.getStayingDate()));
 				sql.append("'");
@@ -156,13 +149,11 @@ public class RoomSqlDao implements RoomDao {
 			sql.append(room.getRoomNumber());
 			sql.append("';");
 			resultSet = statement.executeQuery(sql.toString());
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			RoomException exception = new RoomException(RoomException.CODE_DB_EXEC_QUERY_ERROR, e);
 			exception.getDetailMessages().add("updateRoom()");
 			throw exception;
-		}
-		finally {
+		} finally {
 			close(resultSet, statement, connection);
 		}
 
@@ -173,8 +164,7 @@ public class RoomSqlDao implements RoomDao {
 		try {
 			Class.forName(DRIVER_NAME);
 			connection = DriverManager.getConnection(URL, ID, PASSWORD);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new RoomException(RoomException.CODE_DB_CONNECT_ERROR, e);
 		}
 		return connection;
@@ -192,8 +182,7 @@ public class RoomSqlDao implements RoomDao {
 			if (connection != null) {
 				connection.close();
 			}
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new RoomException(RoomException.CODE_DB_CLOSE_ERROR, e);
 		}
 	}
