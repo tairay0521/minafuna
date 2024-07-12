@@ -1,2 +1,6 @@
 *.class
 .DS_Store
+*.lck
+*.log
+*.properties
+*.script
