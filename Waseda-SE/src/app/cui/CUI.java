@@ -25,6 +25,8 @@ public class CUI {
 	private static final int ADMINISTRATOR_PASSWORD = "YAMAZAKI_TAIRON".hashCode();
 	private BufferedReader reader;
 
+	private int profit;
+
 	CUI() {
 		reader = new BufferedReader(new InputStreamReader(System.in));
 	}
@@ -75,6 +77,7 @@ public class CUI {
 				System.out.println("Menu");
 				System.out.println("1. Check empty rooms");
 				System.out.println("2: Reservation");
+				System.out.println("3: Check reservation");
 				System.out.println("9: End");
 				System.out.print("> ");
 
@@ -96,6 +99,9 @@ public class CUI {
 					case 2:
 						reserveRoom();
 						break;
+					case 3:
+						checkReservation();
+						break;
 				}
 			}
 			System.out.println("Ended");
@@ -112,6 +118,7 @@ public class CUI {
 			while (true) {
 				System.out.println("1. Check-in");
 				System.out.println("2. Check-out");
+				System.out.println("3. Check profit");
 				System.out.println("9. End");
 
 				System.out.print("> ");
@@ -124,6 +131,10 @@ public class CUI {
 						break;
 					case 2:
 						checkOutRoom();
+						profit += 20000;
+						break;
+					case 3:
+						System.out.println("Profit: " + profit);
 						break;
 					case 9:
 						return;
@@ -150,6 +161,28 @@ public class CUI {
 		} catch (Exception e) {
 			throw new AppException("Failed to check empty rooms", e);
 		}
+	}
+
+	private void checkReservation() throws AppException {
+		var reservationDAO = DaoFactory.getInstance().getReservationDao();
+		try {
+			System.out.println("Checking your reservation");
+			System.out.println("Input reservation number");
+			System.out.print("> ");
+			String reservationNumber = reader.readLine();
+			var reservation = reservationDAO.getReservation(reservationNumber);
+			if (reservation == null) {
+				System.out.println("Reservation not found");
+				return;
+			} else {
+				System.out.println("Reservation found");
+				System.out.println("Reservation number: " + reservation.getReservationNumber());
+				System.out.println("Staying date: " + DateUtil.convertToString(reservation.getStayingDate()));
+			}
+		} catch (Exception e) {
+			throw new AppException("Failed to check reservations", e);
+		}
+
 	}
 
 	private void reserveRoom() throws IOException, AppException {
