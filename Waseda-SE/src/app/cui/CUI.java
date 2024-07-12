@@ -192,6 +192,7 @@ public class CUI {
 				System.out.println("Reservation found");
 				System.out.println("Reservation number: " + reservation.getReservationNumber());
 				System.out.println("Staying date: " + DateUtil.convertToString(reservation.getStayingDate()));
+				System.out.println("Roomtype: " + reservation.getStatus());
 			}
 		} catch (Exception e) {
 			throw new AppException("Failed to check reservations", e);
