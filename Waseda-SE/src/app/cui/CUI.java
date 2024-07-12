@@ -79,6 +79,7 @@ public class CUI {
 				System.out.println("1. Check empty rooms");
 				System.out.println("2: Reservation");
 				System.out.println("3: Check reservation");
+				System.out.println("4: Change reservation");
 				System.out.println("5: Cancel reservation");
 				System.out.println("9: End");
 				System.out.print("> ");
@@ -103,6 +104,9 @@ public class CUI {
 						break;
 					case 3:
 						checkReservation();
+						break;
+					case 4:
+						changeReservation();
 						break;
 					case 5:
 						cancelReservation();
@@ -166,8 +170,7 @@ public class CUI {
 				System.out.println("Invalid input");
 				return;
 			}
-			var emptyList = qtyDao.getAvailableQty(date);
-			if(emptyList != null) emptyList = AvailableQty.AVAILABLE_ALL;
+
 			System.out.println("Number of empty rooms: " + emptyList.getQty());
 		} catch (Exception e) {
 			throw new AppException("Failed to check empty rooms", e);
@@ -229,7 +232,7 @@ public class CUI {
 			System.out.println("Invalid input");
 			return;
 		}
-		
+
 		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
 		reserveRoomForm.setStayingDate(stayingDate);
 		String reservationNumber = reserveRoomForm.submitReservation();
@@ -274,6 +277,46 @@ public class CUI {
 		checkoutRoomForm.setRoomNumber(roomNumber);
 		checkoutRoomForm.checkOut();
 		System.out.println("Check-out has been completed.");
+	}
+
+	private void changeReservation() throws IOException, AppException {
+		var reservationDAO = DaoFactory.getInstance().getReservationDao();
+
+		try {
+			System.out.println("Change your reservation");
+			System.out.println("Input reservation number");
+			System.out.print("> ");
+			String oldReservationNumber = reader.readLine();
+			var reservation = reservationDAO.getReservation(oldReservationNumber);
+			if (reservation == null) {
+				System.out.println("Reservation not found");
+				return;
+			} else {
+				reservationDAO.deleteReservation(oldReservationNumber);
+				System.out.println("Reservation found");
+			}
+		} catch (Exception e) {
+			throw new AppException("Failed to find reservation", e);
+		}
+
+		System.out.println("Input new arrival date in the form of yyyy/mm/dd");
+		System.out.print("> ");
+
+		String dateStr = reader.readLine();
+		Date stayingDate = DateUtil.convertToDate(dateStr);
+
+		if (stayingDate == null) {
+			System.out.println("Invalid input");
+			return;
+		}
+
+		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
+		reserveRoomForm.setStayingDate(stayingDate);
+		String newReservationNumber = reserveRoomForm.submitReservation();
+
+		System.out.println("Reservation change has been completed.");
+		System.out.println("New arrival (staying) date is " + DateUtil.convertToString(stayingDate) + ".");
+		System.out.println("New reservation number is " + newReservationNumber + ".");
 	}
 
 	public static void main(String[] args) throws Exception {
