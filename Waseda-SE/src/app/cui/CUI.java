@@ -227,7 +227,7 @@ public class CUI {
 			System.out.println("Invalid input");
 			return;
 		}
-		
+
 		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
 		reserveRoomForm.setStayingDate(stayingDate);
 		String reservationNumber = reserveRoomForm.submitReservation();
@@ -287,7 +287,8 @@ public class CUI {
 				System.out.println("Reservation not found");
 				return;
 			} else {
-				reservationDAO.deleteReservation(oldReservationNumber);
+				var ctl = new ReserveRoomControl();
+				ctl.removeReservation(oldReservationNumber);
 				System.out.println("Reservation found");
 			}
 		} catch (Exception e) {
