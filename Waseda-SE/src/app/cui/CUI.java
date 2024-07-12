@@ -14,6 +14,7 @@ import app.checkin.CheckInRoomForm;
 import app.checkout.CheckOutRoomForm;
 import app.reservation.ReserveRoomForm;
 import domain.DaoFactory;
+import domain.room.AvailableQty;
 
 /**
  * CUI class for Hotel Reservation Systems
@@ -78,6 +79,7 @@ public class CUI {
 				System.out.println("1. Check empty rooms");
 				System.out.println("2: Reservation");
 				System.out.println("3: Check reservation");
+				System.out.println("5: Cancel reservation");
 				System.out.println("9: End");
 				System.out.print("> ");
 
@@ -85,7 +87,7 @@ public class CUI {
 					String menu = reader.readLine();
 					selectMenu = Integer.parseInt(menu);
 				} catch (NumberFormatException e) {
-					selectMenu = 4;
+					selectMenu = 9;
 				}
 
 				if (selectMenu == 9) {
@@ -101,6 +103,9 @@ public class CUI {
 						break;
 					case 3:
 						checkReservation();
+						break;
+					case 5:
+						cancelReservation();
 						break;
 				}
 			}
@@ -150,14 +155,20 @@ public class CUI {
 	}
 
 	private void checkEmptyRooms() throws AppException {
-		var roomsDAO = DaoFactory.getInstance().getRoomDao();
+		var qtyDao = DaoFactory.getInstance().getAvailableQtyDao();
 		try {
-			var emptyList = roomsDAO.getEmptyRooms();
-			emptyList.sort((a, b) -> a.getRoomNumber().compareTo(b.getRoomNumber()));
-			System.out.println("Empty rooms");
-			for (var room : emptyList) {
-				System.out.println("Room Number: " + room.getRoomNumber());
+			System.out.println("Checking empty rooms");
+			System.out.println("Input date in the form of yyyy/mm/dd");
+			System.out.print("> ");
+			String dateStr = reader.readLine();
+			Date date = DateUtil.convertToDate(dateStr);
+			if (date == null) {
+				System.out.println("Invalid input");
+				return;
 			}
+			var emptyList = qtyDao.getAvailableQty(date);
+			if(emptyList != null) emptyList = AvailableQty.AVAILABLE_ALL;
+			System.out.println("Number of empty rooms: " + emptyList.getQty());
 		} catch (Exception e) {
 			throw new AppException("Failed to check empty rooms", e);
 		}
@@ -185,6 +196,27 @@ public class CUI {
 
 	}
 
+	private void cancelReservation() throws AppException {
+		var reservationDAO = DaoFactory.getInstance().getReservationDao();
+		try {
+			System.out.println("Canceling your reservation");
+			System.out.println("Input reservation number");
+			System.out.print("> ");
+			String reservationNumber = reader.readLine();
+			var reservation = reservationDAO.getReservation(reservationNumber);
+			if (reservation == null) {
+				System.out.println("Reservation not found");
+				return;
+			} else {
+				reservationDAO.deleteReservation(reservationNumber);
+				System.out.println("Reservation canceled");
+			}
+		} catch (Exception e) {
+			throw new AppException("Failed to cancel reservation", e);
+		}
+
+	}
+
 	private void reserveRoom() throws IOException, AppException {
 		System.out.println("Input arrival date in the form of yyyy/mm/dd");
 		System.out.print("> ");
@@ -197,7 +229,7 @@ public class CUI {
 			System.out.println("Invalid input");
 			return;
 		}
-
+		
 		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
 		reserveRoomForm.setStayingDate(stayingDate);
 		String reservationNumber = reserveRoomForm.submitReservation();
