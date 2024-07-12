@@ -137,11 +137,10 @@ public class PaymentSqlDao implements PaymentDao {
 	}
 
 	/**
-	 * データベースコネクションを取得します。<br>
+	 *
 	 * 
-	 * @return コネクション
 	 * @throws PaymentException
-	 *            データベースコネクション取得が失敗した場合に発生します。
+	 *            
 	 */
 	private Connection getConnection() throws PaymentException {
 		Connection connection = null;

@@ -61,7 +61,9 @@ public class RoomManager {
 		}
 	}
 
-	private int getMaxAvailableQty() throws RoomException {
+
+
+	public int getMaxAvailableQty() throws RoomException {
 		RoomDao roomDao = getRoomDao();
 		var rooms = roomDao.getRooms();
 		return rooms.size();
