@@ -16,6 +16,7 @@ import app.checkout.CheckOutRoomForm;
 import app.reservation.ReserveRoomControl;
 import app.reservation.ReserveRoomForm;
 import domain.DaoFactory;
+import domain.reservation.ReservationException;
 import domain.room.AvailableQty;
 
 /**
@@ -197,7 +198,6 @@ public class CUI {
 				System.out.println("Reservation found");
 				System.out.println("Reservation number: " + reservation.getReservationNumber());
 				System.out.println("Staying date: " + DateUtil.convertToString(reservation.getStayingDate()));
-				System.out.println("Roomtype: " + reservation.getStatus());
 			}
 		} catch (Exception e) {
 			throw new AppException("Failed to check reservations", e);
@@ -211,6 +211,10 @@ public class CUI {
 		System.out.print("> ");
 
 		String reservationNumber = reader.readLine();
+		if (reservationNumber == null || reservationNumber.length() == 0) {
+			System.out.println("Invalid reservation number");
+			return;
+		}
 		var ctl = new ReserveRoomControl();
 		ctl.removeReservation(reservationNumber);
 	}
@@ -225,6 +229,9 @@ public class CUI {
 		Date stayingDate = DateUtil.convertToDate(dateStr);
 		if (stayingDate == null) {
 			System.out.println("Invalid input");
+			return;
+		} else if (stayingDate.before(new Date())) {
+			System.out.println("Invalid date. Please input a future date.");
 			return;
 		}
 
@@ -268,6 +275,8 @@ public class CUI {
 			return;
 		}
 
+		System.out.println("Price is 8000 yen.");
+
 		CheckOutRoomForm checkoutRoomForm = new CheckOutRoomForm();
 		checkoutRoomForm.setRoomNumber(roomNumber);
 		checkoutRoomForm.checkOut();
@@ -282,37 +291,44 @@ public class CUI {
 			System.out.println("Input reservation number");
 			System.out.print("> ");
 			String oldReservationNumber = reader.readLine();
+
 			var reservation = reservationDAO.getReservation(oldReservationNumber);
 			if (reservation == null) {
 				System.out.println("Reservation not found");
 				return;
 			} else {
+				System.out.println("Reservation found");
+				System.out.println("Input new arrival date in the form of yyyy/mm/dd");
+				System.out.print("> ");
+
+				String dateStr = reader.readLine();
+				Date stayingDate = DateUtil.convertToDate(dateStr);
+
+				if (stayingDate == null) {
+					System.out.println("Invalid input");
+					return;
+				} else if (stayingDate.before(new Date())) {
+					System.out.println("Invalid date. Please input a future date.");
+					return;
+				} else if (stayingDate.equals(reservationDAO.getReservation(oldReservationNumber).getStayingDate())) {
+					System.out.println("Invalid date. Please input a different date.");
+					return;
+				}
 				var ctl = new ReserveRoomControl();
 				ctl.removeReservation(oldReservationNumber);
-				System.out.println("Reservation found");
+
+				ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
+				reserveRoomForm.setStayingDate(stayingDate);
+				String newReservationNumber = reserveRoomForm.submitReservation();
+
+				System.out.println("Reservation change has been completed.");
+				System.out.println("New arrival (staying) date is " + DateUtil.convertToString(stayingDate) + ".");
+				System.out.println("New reservation number is " + newReservationNumber + ".");
+
 			}
 		} catch (Exception e) {
 			throw new AppException("Failed to find reservation", e);
 		}
-
-		System.out.println("Input new arrival date in the form of yyyy/mm/dd");
-		System.out.print("> ");
-
-		String dateStr = reader.readLine();
-		Date stayingDate = DateUtil.convertToDate(dateStr);
-
-		if (stayingDate == null) {
-			System.out.println("Invalid input");
-			return;
-		}
-
-		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
-		reserveRoomForm.setStayingDate(stayingDate);
-		String newReservationNumber = reserveRoomForm.submitReservation();
-
-		System.out.println("Reservation change has been completed.");
-		System.out.println("New arrival (staying) date is " + DateUtil.convertToString(stayingDate) + ".");
-		System.out.println("New reservation number is " + newReservationNumber + ".");
 	}
 
 	public static void main(String[] args) throws Exception {
