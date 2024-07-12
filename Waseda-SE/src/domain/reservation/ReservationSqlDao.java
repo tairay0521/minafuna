@@ -93,7 +93,7 @@ public class ReservationSqlDao implements ReservationDao {
 	}
 
 	// 追加
-	public void deleteReservation(String reservationNumber) throws ReservationException {
+	public void removeReservation(String reservationNumber) throws ReservationException {
 		StringBuffer sql = new StringBuffer();
 		Statement statement = null;
 		ResultSet resultSet = null;

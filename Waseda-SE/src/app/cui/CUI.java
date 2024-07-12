@@ -10,8 +10,10 @@ import java.util.Date;
 
 import util.DateUtil;
 import app.AppException;
+import app.ManagerFactory;
 import app.checkin.CheckInRoomForm;
 import app.checkout.CheckOutRoomForm;
+import app.reservation.ReserveRoomControl;
 import app.reservation.ReserveRoomForm;
 import domain.DaoFactory;
 import domain.room.AvailableQty;
@@ -21,7 +23,7 @@ import domain.room.AvailableQty;
  * 
  */
 public class CUI {
-
+	
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final int ADMINISTRATOR_PASSWORD = "YAMAZAKI_TAIRON".hashCode();
 	private BufferedReader reader;
@@ -156,6 +158,7 @@ public class CUI {
 
 	private void checkEmptyRooms() throws AppException {
 		var qtyDao = DaoFactory.getInstance().getAvailableQtyDao();
+		var rm = ManagerFactory.getInstance().getRoomManager();
 		try {
 			System.out.println("Checking empty rooms");
 			System.out.println("Input date in the form of yyyy/mm/dd");
@@ -167,9 +170,11 @@ public class CUI {
 				return;
 			}
 			var emptyList = qtyDao.getAvailableQty(date);
-			if(emptyList != null) emptyList = AvailableQty.AVAILABLE_ALL;
-			System.out.println("Number of empty rooms: " + emptyList.getQty());
+			var qty = (emptyList == null ||
+					emptyList.getQty() == AvailableQty.AVAILABLE_ALL) ? rm.getMaxAvailableQty() : emptyList.getQty();
+			System.out.println("Number of empty rooms: " + qty);
 		} catch (Exception e) {
+			System.err.println("Error" + e.getMessage());
 			throw new AppException("Failed to check empty rooms", e);
 		}
 	}
@@ -196,25 +201,14 @@ public class CUI {
 
 	}
 
-	private void cancelReservation() throws AppException {
-		var reservationDAO = DaoFactory.getInstance().getReservationDao();
-		try {
-			System.out.println("Canceling your reservation");
-			System.out.println("Input reservation number");
-			System.out.print("> ");
-			String reservationNumber = reader.readLine();
-			var reservation = reservationDAO.getReservation(reservationNumber);
-			if (reservation == null) {
-				System.out.println("Reservation not found");
-				return;
-			} else {
-				reservationDAO.deleteReservation(reservationNumber);
-				System.out.println("Reservation canceled");
-			}
-		} catch (Exception e) {
-			throw new AppException("Failed to cancel reservation", e);
-		}
+	private void cancelReservation() throws IOException, AppException {
+		System.out.println("Canceling your reservation");
+		System.out.println("Input reservation number");
+		System.out.print("> ");
 
+		String reservationNumber = reader.readLine();
+		var ctl = new ReserveRoomControl();
+		ctl.removeReservation(reservationNumber);
 	}
 
 	private void reserveRoom() throws IOException, AppException {
@@ -229,7 +223,7 @@ public class CUI {
 			System.out.println("Invalid input");
 			return;
 		}
-		
+
 		ReserveRoomForm reserveRoomForm = new ReserveRoomForm();
 		reserveRoomForm.setStayingDate(stayingDate);
 		String reservationNumber = reserveRoomForm.submitReservation();

@@ -8,6 +8,7 @@ import java.util.Date;
 import app.AppException;
 import app.ManagerFactory;
 import domain.reservation.ReservationManager;
+import domain.DaoFactory;
 import domain.reservation.ReservationException;
 import domain.room.RoomManager;
 import domain.room.RoomException;
@@ -18,31 +19,50 @@ import domain.room.RoomException;
  */
 public class ReserveRoomControl {
 
-public String makeReservation(Date stayingDate) throws AppException {
-		//Permitting only one night so that change amount of availableQty is always -1
+	public String makeReservation(Date stayingDate) throws AppException {
+		// Permitting only one night so that change amount of availableQty is always -1
 		int availableQtyOfChange = -1;
 		try {
-			//Update number of available rooms
+			// Update number of available rooms
 			RoomManager roomManager = getRoomManager();
 			roomManager.updateRoomAvailableQty(stayingDate, availableQtyOfChange);
 
-			//Create reservation
+			// Create reservation
 			ReservationManager reservationManager = getReservationManager();
 			String reservationNumber = reservationManager.createReservation(stayingDate);
 			return reservationNumber;
-		}
-		catch (RoomException e) {
+		} catch (RoomException e) {
+			AppException exception = new AppException("Failed to reserve", e);
+			exception.getDetailMessages().add(e.getMessage());
+			exception.getDetailMessages().addAll(e.getDetailMessages());
+			throw exception;
+		} catch (ReservationException e) {
 			AppException exception = new AppException("Failed to reserve", e);
 			exception.getDetailMessages().add(e.getMessage());
 			exception.getDetailMessages().addAll(e.getDetailMessages());
 			throw exception;
 		}
-		catch (ReservationException e) {
-			AppException exception = new AppException("Failed to reserve", e);
-			exception.getDetailMessages().add(e.getMessage());
-			exception.getDetailMessages().addAll(e.getDetailMessages());
-			throw exception;
+	}
+
+	public String removeReservation(String reservationID) {
+		// Permitting only one night so that change amount of availableQty is always +1
+		int availableQtyOfChange = 1;
+		try {
+			// Update number of available rooms
+			RoomManager roomManager = getRoomManager();
+			var reservation = DaoFactory.getInstance().getReservationDao().getReservation(reservationID);
+			if (reservation == null) {
+				return "Reservation not found";
+			}
+			roomManager.updateRoomAvailableQty(reservation.getStayingDate(), availableQtyOfChange);
+
+			// Remove reservation
+			DaoFactory.getInstance().getReservationDao().removeReservation(reservationID);
+			return "Reservation removed successfully";
+		} catch (RoomException | ReservationException e) {
+			return "Failed to remove reservation";
 		}
+
 	}
 
 	private RoomManager getRoomManager() {
